@@ -91,6 +91,8 @@
 
         devShells.default = craneLib.devShell {
           checks = self.checks.${system};
+          LIBCLANG_PATH = "${pkgs.clang.cc.lib}/lib";
+          ROCKSDB_LIB_DIR = "${pkgs.rocksdb}/lib";
         };
 
         nixosModules.default = { config, lib, pkgs, ... }:

@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/staging-next";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     crane.url = "github:ipetkov/crane";
     utils.url = "github:numtide/flake-utils";
@@ -179,9 +179,4 @@
             };
           };
       });
-
-  nixConfig = {
-    extra-substituters = [ "https://rgit.cachix.org" ];
-    extra-trusted-public-keys = [ "rgit.cachix.org-1:3Wva/GHhrlhbYx+ObbEYQSYq1Yzk8x9OAvEvcYazgL0=" ];
-  };
 }

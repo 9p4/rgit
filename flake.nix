@@ -22,17 +22,35 @@
     };
   };
 
-  outputs = { self, nixpkgs, utils, crane, advisory-db, treefmt-nix, helix, nix-github-actions }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      utils,
+      crane,
+      advisory-db,
+      treefmt-nix,
+      helix,
+      nix-github-actions,
+    }:
     {
       githubActions = nix-github-actions.lib.mkGithubMatrix {
-        checks =
-          builtins.mapAttrs
-            (name: value: if name != "x86_64-linux" then removeAttrs value [ "clippy" "audit" "formatting" "doc" ] else value)
-            { inherit (self.checks) x86_64-linux aarch64-darwin; };
+        checks = builtins.mapAttrs (
+          name: value:
+          if name != "x86_64-linux" then
+            removeAttrs value [
+              "clippy"
+              "audit"
+              "formatting"
+              "doc"
+            ]
+          else
+            value
+        ) { inherit (self.checks) x86_64-linux aarch64-darwin; };
       };
     }
-    //
-    utils.lib.eachDefaultSystem (system:
+    // utils.lib.eachDefaultSystem (
+      system:
       let
         pkgs = import nixpkgs { inherit system; };
         craneLib = crane.mkLib pkgs;
@@ -57,7 +75,10 @@
           inherit src;
           strictDeps = true;
           buildInputs = pkgs.lib.optionals pkgs.stdenv.isDarwin [ pkgs.libiconv ];
-          nativeBuildInputs = with pkgs; [ cmake clang ];
+          nativeBuildInputs = with pkgs; [
+            cmake
+            clang
+          ];
           LIBCLANG_PATH = "${pkgs.clang.cc.lib}/lib";
           ROCKSDB_LIB_DIR = "${pkgs.rocksdb}/lib";
         };
@@ -75,12 +96,18 @@
           build = rgit;
           clippy = craneLib.cargoClippy buildArgs;
           doc = craneLib.cargoDoc buildArgs;
-          audit = craneLib.cargoAudit { inherit advisory-db; src = cargoOnlySrc; };
+          audit = craneLib.cargoAudit {
+            inherit advisory-db;
+            src = cargoOnlySrc;
+          };
           deny = craneLib.cargoDeny { inherit src; };
-          test = craneLib.cargoNextest (buildArgs // {
-            partitions = 1;
-            partitionType = "count";
-          });
+          test = craneLib.cargoNextest (
+            buildArgs
+            // {
+              partitions = 1;
+              partitionType = "count";
+            }
+          );
           formatting = treefmt.config.build.check self;
         };
 
@@ -95,7 +122,13 @@
           ROCKSDB_LIB_DIR = "${pkgs.rocksdb}/lib";
         };
 
-        nixosModules.default = { config, lib, pkgs, ... }:
+        nixosModules.default =
+          {
+            config,
+            lib,
+            pkgs,
+            ...
+          }:
           with lib;
           let
             cfg = config.services.rgit;
@@ -172,11 +205,22 @@
                   RestrictNamespaces = true;
                   LockPersonality = true;
                   RemoveIPC = true;
-                  RestrictAddressFamilies = [ "AF_INET" "AF_INET6" ];
-                  SystemCallFilter = [ "@system-service" "~@privileged" ];
+                  RestrictAddressFamilies = [
+                    "AF_INET"
+                    "AF_INET6"
+                  ];
+                  SystemCallFilter = [
+                    "@system-service"
+                    "~@privileged"
+                  ];
                 };
               };
             };
           };
-      });
+      }
+    );
+  nixConfig = {
+    extra-substituters = [ "https://hydra.ersei.net" ];
+    extra-trusted-public-keys = [ "hydra.ersei.net:QIiw2nPKXo6ACvciVlJoZWcdl/9k6U7WLpb34yB4Xic=" ];
+  };
 }

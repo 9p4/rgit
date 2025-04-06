@@ -33,23 +33,7 @@
       helix,
       nix-github-actions,
     }:
-    {
-      githubActions = nix-github-actions.lib.mkGithubMatrix {
-        checks = builtins.mapAttrs (
-          name: value:
-          if name != "x86_64-linux" then
-            removeAttrs value [
-              "clippy"
-              "audit"
-              "formatting"
-              "doc"
-            ]
-          else
-            value
-        ) { inherit (self.checks) x86_64-linux aarch64-darwin; };
-      };
-    }
-    // utils.lib.eachDefaultSystem (
+    utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = import nixpkgs { inherit system; };
@@ -109,6 +93,10 @@
             }
           );
           formatting = treefmt.config.build.check self;
+        };
+
+        hydraJobs = {
+          rgit = rgit;
         };
 
         formatter = treefmt.config.build.wrapper;

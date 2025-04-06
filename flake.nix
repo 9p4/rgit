@@ -79,7 +79,7 @@
             doCheck = false;
             postInstall = ''
               wrapProgram $out/bin/rgit \
-                --set PATH ${pkgs.lib.makeBinPath [ pkgs.git ]}
+                --set PATH ${pkgs.lib.makeBinPath [ pkgs.gitMinimal ]}
             '';
           }
         );

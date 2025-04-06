@@ -7,10 +7,11 @@ RUN nix --extra-experimental-features "nix-command flakes" --accept-flake-config
 RUN mkdir /tmp/nix-store-closure
 RUN cp -R $(nix-store -qR result/) /tmp/nix-store-closure
 
-FROM scratch
+FROM alpine:latest
 
 WORKDIR /app
 COPY --from=builder /tmp/nix-store-closure /nix/store
 COPY --from=builder /app/result /app
+RUN apk add --no-cache git git-daemon
 
 ENTRYPOINT ["/app/bin/rgit"]
